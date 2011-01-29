@@ -1,0 +1,59 @@
+Chap6
+
+* 6.3
+** 6.3.2
+どんな道具を用意すればいいんだっけ?
+
+De Bruijn's index
+ - terms
+ - context
+ - shifting
+ - substitution
+
+De Bruijn's level
+ - terms
+ - context
+ - shifting
+ - substitution
+
+*** terms
+そのままで良いような……
+n は free variables の数なんだし.
+
+*** context
+これもそのままかな.
+使い方がちょっと違うけど.
+
+6.1.5 相当の話を一度しないとかな?
+
+Г = {a, b, c}
+rm(^x. (^y. x y) x)
+
+Г = {x, a, b, c}
+^. rm((^y. x y) x)
+
+Г = {x, a, b, c}
+^. rm(^y. x y) 0
+
+Г = {x, y, a, b, c}
+^. (^. rm(x y)) 0
+
+Г = {x, y, a, b, c}
+^. (^. 0 1) 0
+
+
+Г = {x, y, a, b, c}
+current depth = 0
+re(^. (^. 0 1) 0)
+
+Г = {x, y, a, b, c}
+current depth = 1
+^x. re(^. 0 1) x
+
+Г = {x, y, a, b, c}
+current depth = 1
+^x. (^y. x y) x
+
+
+*** shifting
+
