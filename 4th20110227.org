@@ -57,3 +57,40 @@ current depth = 1
 
 *** shifting
 
+
+*** substitution
+(^x. ^y. x y) ^x. x
+= ^y. (^x. x) y
+
+これを de Bruijn level で.
+
+(^. ^. 0 1) ^. 0
+= ^. (^. 0) 0
+
+最後に down shift が要りそう.
+問題は変数束縛だが.
+
+(^x. ^y. x y) ^x. y
+= ^z. (^x. y) z
+
+(^. ^. 0 1) ^. 1
+= ^. (^. 2) 0
+
+代入される側の up shift が最初に必要.
+それは一緒か.
+
+(^. ^. 0 1) ^. 1
+= [0 -> (^. 2)](^. 0 1)
+= ^. [0 -> (^. 3)](0 1)
+= ^. (^. 3) 1
+[shift down all]
+= ^. (^. 2) 0
+
+なんか違う!!
+
+
+これは register machine なの?
+いや register machine の意味を取り違えてた.
+
+
+要は, 束縛変数を避けて shift する必要がある.
