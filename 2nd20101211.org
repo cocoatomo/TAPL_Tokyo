@@ -1,0 +1,173 @@
+* 5.2
+** Enriching the Calculus (P63)
+λNB の導入
+hybridize λ and NB
+true, false を抽象化したいのかな?
+実装を気にせず進めたいのかな?
+それとも単に表記が面倒?
+
+「振る舞いが同じ」という視点で見てるので, チェックが面倒な pure lambda ではなく
+NB の記号を使いたい. と書いてある.
+** Recursion
+redex: (mathematics) Something to be reduced according to the rules of a formal system.
+from http://en.wiktionary.org/wiki/redex
+
+omega -[recude]-> omega !!
+omega = (λx. x x) (λx. x x)
+
+g = λfct. λn ...
+なんだか上手く展開してくれる.
+
+なんでなんだろ??
+アイディアが知りたい.
+
+*** 5.2.9
+g = λfct. λn. test (iszero n) c_1 (times n (fct (pred n)))
+これではマズいんだっけ?
+
+test = λl. λm. λn. l m n
+
+redex が評価されてしまう??
+
+if A then B else C
+=
+(test A (λx.B) (λx.C)) c_0
+
+test を評価すると
+*** 5.2.10
+churchnat = λn. fix g
+g = λfct. λn. if iszero n then c_0
+                else scc (fct (pred n))
+
+*** 5.2.11
+[x, y, z]
+::= c x (c y (c z n))
+
+λl. l plus zero
+
+あれ? あ, 定義が違った.
+
+l = cons x (cons y (cons z nil))
+
+listsum = fix accum
+accum = λfct. λl. if isnil l then c_0
+                    else plus (head l) (fct (tail l))
+
+** Representation
+churchnat と nat の対応
+
+"置き換えても大丈夫だよ." という話.
+内容的には "同値" の話.
+
+* 5.3 Formalities
+NB (Chapter 3) と同じように数学的に定式化する.
+** Syntax
+*** 5.3.3
+proof leaded by definition
+
+def of size -> ??
+size(λx.t) = size(t)
+
+t = x
+ #FV(x) = 1
+size(x) = 1
+
+t = λx.t_1
+ #FV(λx.t_1) = #FV(t_1) - 1 (if t_1 contains x)
+               #FV(t_1)     (otherwise)
+size(λx.t_1) = size(t_1)
+(also size(λx.t_1) = size(t_1) + 1)
+
+t = t_1 t_2
+ #FV(t_1 t_2) = #(FV(t_1) \/ FV(t_2)) <= #FV(t_1) + #FV(t_2)
+
+** Substitution
+alpha
+beta
+eta <- why not gamma?
+
+*** 5.3.6
+-> P.56
+
+[full beta-reduction]
+= reduce any time
+
+replace E-App2 with
+
+t_2 -> t'_2
+-------------------
+t_1 t_2 -> t_1 t'_2
+
+
+replace E-AppAbs with
+
+(λx.t_12) t_2 -> [x -> t_2] t_12
+
+
+[normal-order]
+= outer-most
+
+no replaces needed
+
+really??
+
+No!!
+
+call-by-value = outer-most & right-hand side already reduced
+
+
+call-by-value - "right-hand side already reduced"
+"right-hand side already reduced" == EAppAbs
+
+replace E-AppAbs with
+
+(λx.t_12) t_2 -> [x -> t_2] t_12
+
+
+[lazy]
+= call by name
+
+inside abstractions are not reduced
+
+replace E-AppAbs with
+
+(λx.t_12) t_2 -> [x -> t_2] t_12
+
+delete E-App2
+
+*** 5.3.7
+introducing "wrong" into λNB
+
+what is the definition of λNB??
+
+λ with an abstract boolean and arithmetic expression
+such as "true", "false", "0", and so on.
+
+how do we represent "wrong" as a term in pure λ
+
+hmm...
+
+omega??
+
+う〜ん, こいつはいったん評価を初めると終わらなくなっちゃうから, 取り扱い要注意.
+
+もしくは絶対に束縛されない変数αとか.
+
+*** 5.3.8
+[full beta-reduction]
+
+x↓x
+
+v↓v
+
+t_1↓v_1 v_1 t_2↓v
+-------------------
+t_1 t_2↓v
+
+t_2↓v_2 t_1 v_2↓v
+-------------------
+t_1 t_2↓v
+
+[x -> t_2] t_12↓v
+------------------
+(λx.t_12) t_2↓v

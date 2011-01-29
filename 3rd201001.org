@@ -1,0 +1,143 @@
+Chapter6
+"up to renaming of bound variable" というモヤっとした表現を使った.
+実装するときには形が 1 つに定まった方がいいよね.
+方法はいくつかある.
+ 1. Chap5 でやったように "fresh" な変数に rename する.
+ 2. Barendregt convention (ここでは深くは扱わないので軽く紹介)
+ 3. 名前付け替えの不要な正規形を導入
+ 4. explicit substitutions を導入
+ 5. combinatry logic とかで変数そのものを不要にする
+
+どれを選ぶかは趣味 (taste) の問題.
+実装を考えると速度の違いとかあるけど, この本では興味無いね.
+
+この章では 3 の方法を選択する.
+理由)
+後でもっと複雑な式を扱うようになったときに便利だから. 拡張しやすいから.
+主な理由)
+間違って実装すると盛大に破滅する方が間違いがすぐ見付かって良いから.
+
+* 6.1 Terms and Contexts
+de Bruijn の idea
+読みづらいけど直接的
+
+変数の名前を決め打ちにする.
+内側から 0, 1, 2,...
+
+de Brujin terms
+de Brujin indices (= "static distance")
+
+** 6.1.1
+c0 = λ.λ.0
+z -> 0
+s -> 1
+
+c2 = λ.λ.1 (1 0)
+z -> 0
+s -> 1
+
+plus = λ.λ.λ.λ.3 1 (2 0 1)
+z -> 0
+s -> 1
+n -> 2
+m -> 3
+
+fix = λ. (λ. 2 (λ. (1 1) 0)) (λ. 2 (λ. (1 1) 0))
+???? correct ?
+y -> 0
+x -> 1
+f -> 2
+
+No, not correct!
+fix = λ. (λ. 1 (λ. (1 1) 0)) (λ. 1 (λ. (1 1) 0))
+
+y -> 0: easy
+x -> 1: because λx. ... λy. (x x) y ...
+f -> 1: because λf. (λx. f ... rest of term do NOT influence indexing of f.
+
+
+foo = (λ. (λ. 0)) (λ. 0)
+
+
+
+
+** 6.1.2
+形式的に定義してみましょう.
+
+T は集合の集合 {T_0, T_1,...}
+1. k ∈ T_n (0 ≦ k < n)
+2. if t_1 ∈ T_n, n > 0 then λ.t_1 ∈ T_{n-1}
+3. if t_1, t_2 ∈ T_n then (t_1 t_2) ∈ T_n
+
+集合の集まりを定義しているのに注意.
+set ではなく family と呼んだのはなぜ?
+
+T_n は高々 n 個の自由変数 (非束縛変数) 0...n-1 を持つ項
+
+closed (自由変数無し) なら形は一意
+free variable があるときはどうするか?
+λx. y x とか
+
+naming context (名前付けの文脈)
+
+この本では
+Γ = x -> 4, y -> 3, z -> 2, a -> 1, b -> 0
+とする.
+x (y z) -> 4 (3 2)
+λw. y w -> λ. 4 0
+λw.λa.x -> λ.λ.6
+下2つは Shift を入れてある.
+
+** 6.1.3
+変数名として x_0,...,x_n があったとき
+文脈 Γ = x_n, x_n-1,..., x_0 は x_i -> i と決める.
+dom(Γ) = {x_n,...,x_0} と書く.
+
+** 6.1.4
+3.2.3 みたいに T_n (n-terms) を構成して, 既存の定義と同等なことを示せ.
+
+inductive def
+1. T_n^0 = φ
+2. T_n^{i+1} =
+ {0, 1, 2,..., n-1} # variable
+ ∪ {λ.t | t ∈ T_{n+1}^i} # abstraction
+ ∪ {t_1 t_2 | t_1, t_2 ∈ T_n^i} # application
+
+T_n = ∪_i T_n^i
+
+n をまたいで関連する.
+
+*** 同等であることの証明
+1, 2, 3 を満たす最小の T_n であることを示せば良い.
+
+1. def2 より 1 成立.
+2. t_1 ∈ T_n とすると ∃i t_1 ∈ T_n^i. def2 より λ.t_1 ∈ T_{n-1}^{i+1}. 成立.
+3. def2 より成立.
+
+さて最小性.
+
+他に 6.1.2 の1, 2, 3を満たす T' があったとき, T_n ⊂ T'_n を示せば良い.
+
+∀i, T_n^i ⊂ T'_n を示せば良い.
+induction about i
+
+case1: 0, 1, 2,..., n-1 ∈ T'_n (because 1)
+
+case2: induction about i
+λ.t ∈ T_n^i, t ∈ T_{n+1}^i →IH→ t ∈ T'_{n+1} → λ.t ∈ T'_n
+
+case3: induction about size of term
+t_1 t_2 ∈ T_n^i → t_1, t_2 ∈ T_n^i →IH→ t_1, t_2 ∈ T'_n → t_1 t_2 ∈ T'_n
+
+** 6.1.5
+*** nameless form に変換する関数を書け.
+たぶん定義に沿った再帰的な関数になるんだろう
+
+removenames(x_i) = i
+removenames(λ.t) = λ
+
+
+*** ordinary form に変換する関数を書け.
+
+* 6.2 Shifting and Substitution
+* 6.3 Evaluation

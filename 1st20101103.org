@@ -1,0 +1,119 @@
+* review
+
+** 3.5.4
+
+def subderivation:
+
+ a b
+ ---
+  c
+
+=> a is a subderivation of c. Also b.
+
+if a is a subderivation of b and b is a subderivation of c,
+then a is a subderivation of c.
+(transitive)
+
+=> derivation induction
+
+* preview & memo
+
+:memo: talking about subderivation
+
+** 3.5.8
+
+structural derivation about a term t.
+to show "t: not value => t: not in normal form"
+
+** 3.5.9
+easy
+
+** 3.5.10
+just say the definition of t->*t'
+
+**by terms of inference rules!!***
+
+** 3.5.11 (determinancy)
+see my note
+
+termination measure
+
+** 3.5.12
+easy
+
+** 3.5.13
+see my note. long!!
+
+E-Funny1 breaks the uniqueness of normal form
+
+E-Funny2 breaks the 1step determination
+
+:see: answer provided by the book
+
+** 3.5.14
+straight forward but boring
+
+** 3.5.15
+closed term -> term
+"closed term" occurs in P.55
+
+** 3.5.16
+see my note. straight forward and too long (boring)!!
+
+badbool, {true, false} <- disjoint
+badnat, {nv} <- disjoint
+
+** 3.5.17
+forgot!!
+derivation induction?
+
+Base Case: t is a value
+Step Forwarding: derivation
+
+v: value
+
+|
+V
+
+P.499
+Case E-IfTrue: if true then t_2 else t_3
+Case E-IfFalse: if true then t_2 else t_3
+
+
+** 3.5.18
+E-IfThen t_2 -> t'_2
+E-IfElse t_3 -> t'_3 (t_2 = true of false)
+    E-IfElseTrue, E-IfElseFalse
+
+using "big-step", it is easy to notate.
+-> Fail: "big step" cannot discribe the t zj not v
+
+using "wrong", it is easy to notate!
+
+Don't discuss without term definitions!
+e.g. "value", "stuck"
+
+Don't heat up... > me
+
+Chapter 5
+
+application in lambda-calculus is left-association
+
+"as possible"
+
+^x. (^y. x y) y
+
+z = ^y. x y
+result = ^x. z y
+
+
+^x. t
+
+ |
+parse
+ |
+ V
+
+x
+|
+t
