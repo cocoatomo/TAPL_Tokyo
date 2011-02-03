@@ -56,6 +56,7 @@ current depth = 1
 
 
 *** shifting
+↑_c^d: c 未満のところは束縛変数, それらとぶつからないように shift する.
 
 
 *** substitution
