@@ -1,0 +1,59 @@
+Chapter9
+========
+
+|- : judgement
+turn style
+
+9.3.2
+-----
+
+x: S->T, x: S \in Г
+が出てくるが, S と S -> T が同じでなければならない.
+
+
+Togetter に「再帰型があると再帰プログラムが書ける」
+title: iso- と equi- ...
+
+
+S = S -> T は Haskell の Arrow
+
+
+9.3.5
+-----
+T-App でほぐして, T-Abs でほぐして
+
+9.3.6
+-----
+permutation
+
+小野先生
+部分構造論理
+
+Advansed... permutation を仮定しないもとでの話も出ている.
+
+CLTT 良いよ!!
+
+9.3.10
+------
+例が変な例じゃない??
+
+Curry-Howard
+
+program <-> type <-> proposition
+
+Djinn of Haskell
+
+
+¬Q -> Q -> False, Q -> unit
+
+Either Q (Q -> unit)
+
+
+¬¬Q -> Q: call/cc
+
+kinaba さんのブログに C-H corr. の話が載っている.
+背理法と call/cc
+
+linear logic
+
+logic system <-> type system
