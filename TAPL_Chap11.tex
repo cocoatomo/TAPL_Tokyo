@@ -1,23 +1,289 @@
 \documentclass[13pt,dvipdfm]{beamer}
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{amsmath,amssymb,amsthm, amscd}
 \usepackage[all]{xy}
 
 
 \usepackage{beamerthemeshadow}
 \usefonttheme{professionalfonts}
 
+\newcommand{\term}[1][t]{\mathsf{#1}}
+\newcommand{\type}[1][T]{\mathsf{#1}}
+\newcommand{\var}[1][x]{\mathsf{#1}}
+\newcommand{\letbind}[3]{\mathsf{let}\ #1\mathsf{=}#2\ \mathsf{in}\ #3}
+
 \title{TAPL Chap11\\Simple Extensions}
 \author{Kinebuchi Tomohiko}
-\date{2011/01/09}
+\date{\today}
 
 \begin{document}
 \frame{\titlepage}
 
 \frame{
-$\mathfrak{A}$: a set of base types
+  \frametitle{言語の拡張}
+  普段見慣れているプログラミング言語に近付けよう. \\
+  → 各種言語要素を追加していく.
 
-$\mathbb{A}$: a concrete base type
+  derived form とかが出てくる.
+}
+
+\frame{
+  \frametitle{11.1 Base Type}
+  Base Type の集合を抽象的に
+  $\mathcal{A}$
+  と表記する.\\
+  個々の Base Type は
+  $\mathsf{A, B, C}$
+  と表記する.
+}
+
+\frame{
+  \frametitle{11.2 The Unit Type}
+  Unit 型を導入する.\\
+  unit は Unit 型の「唯一」の value\\
+  Unit 型が下半分に出現する導出規則が無いため具体的な term の形は不明
+  \vspace{18pt}
+  Unit は副作用を表現する.\\
+  C や Java の void に近い.
+  void というと Bot 型 (Bottom \S15.4) に近いように聞こえるが
+  実際には Unit 型に近い.
+}
+
+\frame{
+  \frametitle{11.2.1 Exercise}
+  $t_n$ と $t_{n+1}$ は定数分のサイズしか違わないのに
+  $t_{n+1}$ の簡約は $t_n$ の 2 倍かかる, ような $t_n$.
+}
+
+\frame{
+  \frametitle{11.3 Derived Forms}
+  sequence と wildcard を導入する.
+}
+
+\frame{
+  \frametitle{Sequence}
+  意味としては $\term_1$ を評価してから, $\term_2$ を評価する.\\
+  文法として組み込む方法は,
+  \begin{enumerate}
+    \item E-Seq, E-SeqNext, T-Seq を文法に追加する.\\
+    \item $\term_1;\term_2$ を $(\lambda \term[x]:\type[Unit].\ \term_2)$ の略記と見る. (derived form)
+  \end{enumerate}
+  文法の追加の方は, E-AppAbs (P. 72) を良く見ると
+  $t_1$ が評価されてから $t_2$ が評価される仕組みになっていることが分かる.
+}
+
+\frame{
+  \frametitle{11.3.1 derived form であること}
+  \begin{theorem}
+    $\term_1;\term_2$ と $(\lambda \term[x]: \type[Unit]. \term_2)\ \term_1$
+    はいつでも書き換えできる.\\
+    = 以下の可換図式が成立する.
+  \end{theorem}
+  \begin{align*}
+    \begin{CD}
+      \term @>>E> \term' \\
+      @VVeV @VVeV \\
+      e(\term) @>>I> e(\term')
+    \end{CD}
+  \end{align*}
+  E は E-Seq, E-SeqNext, T-Seq を追加した世界\\
+  I は追加してない世界
+}
+\frame{
+  \frametitle{proof}
+  \begin{proof}
+    $e$ を再帰的に定義する. 話はそこからだ. \\
+    (evaluation) \\
+    $\Rightarrow$
+    $\term = \term_1;\term_2\ (\term \neq \term[unit]), \term[unit];\term_2$ を考える \\
+    $\Leftarrow$
+    $\term$ の形について場合分け (実質 $\term = \term_1;\term_2$ だけ扱う)\\
+    (typing) \\
+    $\Rightarrow$
+    $t = \term_1;\term_2$ を考える \\
+    $\Leftarrow$
+    $\term$ の形について場合分け (実質 $\term = \term_1;\term_2$ だけ扱う)
+  \end{proof}
+}
+
+\frame{
+  \frametitle{}
+  \begin{align*}
+    &
+    \begin{CD}
+      \term_1;\term_2 @>>E> \term'_1;\term_2\\
+      @VVeV @VVeV\\
+      (\lambda \term[x]:\type[Unit].e(\term_2))\ e(\term_1) @>>I> (\lambda \term[x]:\type[Unit].e(\term_2))\ e(\term'_1)
+    \end{CD}\\
+    &
+    \begin{CD}
+      \term[unit];\term_2 @>>E> \term_2\\
+      @VVeV @VVeV\\
+      (\lambda \term[x]:\type[Unit].e(\term_2)) \term[unit] @>>I> e(\term_2)
+    \end{CD}
+  \end{align*}
+}
+
+\frame{
+  \frametitle{derived form について}
+  言語には手を加えないで, 表面の文法を拡張すること. \\
+  型安全性とかは証明する必要有→\S 11.3.1\\
+  Derived Form = Syntactic Sugar\\
+  逆は desugar (脱糖?)
+}
+
+\frame{
+  \frametitle{Wildcard}
+  wildcard $\_$ を derived form として導入する.\\
+  $\lambda \term[x]:\type[S].\ \term$ を $\lambda \_:\type[S].\ \term$ と略記する.
+}
+
+\frame{
+  \frametitle{Exercise 11.3.2}
+  追加すべき evaluation \& typing rules
+  \begin{align*}
+    (\lambda \_:\type_{11}.\term_{12})\ \term[v]_2 \rightarrow \term_{12}
+  \end{align*}
+  \begin{align*}
+    \frac{\Gamma \vdash \term_2 : \type_2}{\Gamma \vdash \lambda \_:\type[T].\term_2 : \type \rightarrow \type_2}
+  \end{align*}  
+  (c.f. Figure 9-1, P.103)\\
+  derived form であること\\
+  →\S 11.3.1 と一緒
+}
+
+\frame{
+  \frametitle{11.4 Ascription}
+  term の一部として型を明示
+  \begin{enumerate}
+    \item term の型を覚えておかなくても良い (特に文書中)
+    \item 複雑な term の型の表示 (型の別名も使用する)
+  \end{enumerate}
+  抽象化としての ascription
+  (ascription と cast の関係は \S 15.5 で再度議論する)
+}
+
+\frame{
+  \frametitle{型の略記}
+  $\type[UU] = \type[Unit] \rightarrow \type[Unit]$ とか\\
+  型と型の略記は, 書き手の都合で自由に入れ換えられる\\
+  こういう仕組みは言語によって有ったり (OCaml), 無かったり (Java)\\
+}
+
+\frame{
+  \frametitle{Exercise 11.4.1}
+  (1) $\term\ \mathsf{as}\ \type \equiv (\lambda \term[x]:\type)\ \term$\\
+  derived form であることは \S 11.3.1 と同様の方法で示す.\\
+  $e(\term\ \text{as}\ \type) = \term$\\
+  (2) $\term_1\ \text{as}\ \type \rightarrow \term_1$\\
+  
+}
+
+\frame{
+  \frametitle{11.5 Let Bindings}
+  複雑な式で, 部分式の繰り返しを避け読み易くする\\
+  ML 流の評価順序\\
+  $\letbind{\var}{\term_1}{\term_2}$\\
+  $\term_1$ を value になるまで評価してから $\beta$ 簡約して $\term_2$ を評価
+}
+
+\frame{
+  \frametitle{derived form たり得るか?}
+  $\letbind{\var}{\term_1}{\term_2} \equiv (\lambda \var:\type_1.\term_2)\ \term_1$\\
+  $\type_1$ をどこかから調達しないといけない\\
+  → 型付き導出木から調達\\
+  \begin{itemize}
+  \item Sequence, Wildcard, Ascription = term の変形
+  \item Let Binding = 型付き導出木の変形 \
+    → ``a little less derived''
+  \end{itemize}
+  Chap22 でも let を derived form としない理由を見る
+}
+
+\frame{
+  \frametitle{11.6 Pairs}
+  ここから Pair, Tuple, Record という直積集合を扱っていく.\\
+  Pair は $\type_1 \times \type_2$ という型を持つ.\\
+  直積 (direct product) やカーテシアン積 (cartesian product) と言う.\\
+  「直積 (product)」と「射影 (projection)」の 2 操作がある.\\
+  Pair の評価は左成分から, となっている. (本質的ではないルール.)
+}
+
+\frame{
+  \frametitle{11.7 Tuples}
+  直積成分を Pair よりも増やせるようにした型.\\
+  curly brace を使った型表記が特徴的.
+  \begin{align*}
+    \{{\type_i}^{i \in 1\dots n}\}
+  \end{align*}
+  Pair との違いは成分の評価順序が自由になったこと (のみ).
+}
+
+\frame{
+  \frametitle{11.8 Records}
+  構造体, immutable dictionary, associative array など.
+  index の代わりに label が出てくる.
+}
+
+\frame{
+  \frametitle{Exercise 11.8.1}
+  どこが explicit じゃないのか分からない……
+}
+
+\frame{
+  \frametitle{Tuple is a special case of Record}
+  $l_i = i$ という暗黙のラベルが付いている Record が Tuple\\
+  {a:Bool, Nat, c:Bool} も {a:Bool, 2:Nat, c:Bool} の略記と考えられる\\
+  しかし, ややこしいので止めましょう.
+}
+
+\frame{
+  \frametitle{Record field の順序}
+  多くの言語では Record の個々の要素の順番は無視して同値性を考える.\\
+  ex. Java の Map\\
+  \begin{quote}
+    boolean equals(Object o)\\
+    指定されたオブジェクトがこのマップと等しいかどうかを比較します。指定されたオブジェクトもマップであり、2 つの Map が同じマッピングを表している場合は true を返します。つまり、t1.entrySet().equals(t2.entrySet()) である場合、2 つのマップ t1 と t2 は同じマッピングを表します。これにより、Map インタフェースの実装が異なる場合でも、equals メソッドが正しく動作することが保証されます。\\
+  \end{quote}
+}
+
+\frame{
+  \frametitle{Record field の順序}
+  しかしこの本では, 順序も考慮した同値性を選択.\\
+  Chap15 で subtyping を使って {a:1, b:2} と {a:2, b:1} を同一視する.
+  そのパフォーマンスについては \S 15.6 で議論する.
+}
+
+\frame{
+  \frametitle{Record Pattern Match}
+  拡張された Let Binding\\
+  ex. destructuring-bind (Common Lisp), multiple-value-bind (elisp), multiple assignment\\
+  「同じ変数は 2 度現れない」という仮定のもと, M-Rcd では代入演算を合成している.
+}
+
+\frame{
+  \frametitle{Exercise 11.8.2}
+  
+}
+
+\frame{
+  \frametitle{}
 
 }
+
+\frame{
+  \frametitle{}
+
+}
+
+\frame{
+  \frametitle{}
+
+}
+
+\frame{
+  \frametitle{}
+
+}
+
 
 \end{document}
