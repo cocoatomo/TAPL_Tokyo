@@ -40,9 +40,8 @@
   \frametitle{11.2 The Unit Type}
   Unit 型を導入する.\\
   unit は Unit 型の「唯一」の value\\
-  Unit 型が下半分に出現する導出規則が無いため具体的な term の形は不明
-  \vspace{18pt}
-  Unit は副作用を表現する.\\
+  Unit 型が下半分に出現する導出規則が無いため具体的な term の形は不明\\
+  副作用は Unit で表現できる.\\
   C や Java の void に近い.
   void というと Bot 型 (Bottom \S15.4) に近いように聞こえるが
   実際には Unit 型に近い.
@@ -50,8 +49,10 @@
 
 \frame{
   \frametitle{11.2.1 Exercise}
-  $t_n$ と $t_{n+1}$ は定数分のサイズしか違わないのに
-  $t_{n+1}$ の簡約は $t_n$ の 2 倍かかる, ような $t_n$.
+  $\term_n$ と $\term_{n+1}$ は定数分のサイズしか違わないのに
+  $\term_{n+1}$ の簡約は $\term_n$ の 2 倍かかる, ような $\term_n$.\\
+  $\term_0 = \lambda \var.\ \var,\ \term_n = (\lambda \var.\ \var\ \var)\ \term_{n-1}$\\
+  c.f. 高階関数クイズ
 }
 
 \frame{
@@ -65,7 +66,7 @@
   文法として組み込む方法は,
   \begin{enumerate}
     \item E-Seq, E-SeqNext, T-Seq を文法に追加する.\\
-    \item $\term_1;\term_2$ を $(\lambda \term[x]:\type[Unit].\ \term_2)$ の略記と見る. (derived form)
+    \item $\term_1;\term_2$ を $(\lambda \term[x]:\type[Unit].\ \term_2)\ \term_1$ の略記と見る. (derived form)
   \end{enumerate}
   文法の追加の方は, E-AppAbs (P. 72) を良く見ると
   $t_1$ が評価されてから $t_2$ が評価される仕組みになっていることが分かる.
@@ -94,7 +95,7 @@
     $e$ を再帰的に定義する. 話はそこからだ. \\
     (evaluation) \\
     $\Rightarrow$
-    $\term = \term_1;\term_2\ (\term \neq \term[unit]), \term[unit];\term_2$ を考える \\
+    $\term = \term_1;\term_2\ (\term_1 \neq \term[unit]), \term[unit];\term_2$ を考える \\
     $\Leftarrow$
     $\term$ の形について場合分け (実質 $\term = \term_1;\term_2$ だけ扱う)\\
     (typing) \\
@@ -171,9 +172,9 @@
 
 \frame{
   \frametitle{Exercise 11.4.1}
-  (1) $\term\ \mathsf{as}\ \type \equiv (\lambda \term[x]:\type)\ \term$\\
+  (1) $\term\ \mathsf{as}\ \type \equiv (\lambda \term[x]:\type\ \var)\ \term$\\
   derived form であることは \S 11.3.1 と同様の方法で示す.\\
-  $e(\term\ \text{as}\ \type) = \term$\\
+  $e(\term\ \text{as}\ \type) = (\lambda \term[x]:\type\ \var)\ \term$\\
   (2) $\term_1\ \text{as}\ \type \rightarrow \term_1$\\
   
 }
@@ -215,7 +216,7 @@
   \begin{align*}
     \{{\type_i}^{i \in 1\dots n}\}
   \end{align*}
-  Pair との違いは成分の評価順序が自由になったこと (のみ).
+  成分は左から評価.
 }
 
 \frame{
@@ -226,13 +227,16 @@
 
 \frame{
   \frametitle{Exercise 11.8.1}
-  どこが explicit じゃないのか分からない……
+  どこが explicit じゃないのか分からない……\\
+  \begin{align*}
+    \frac{\var[l]_i = \var[l]_j}{\{{\term[l]_i = \term[v]_i}^{i \in 1 \dots n}\}.\term[l]_j \rightarrow \term[v]_j}
+  \end{align*}
 }
 
 \frame{
   \frametitle{Tuple is a special case of Record}
   $l_i = i$ という暗黙のラベルが付いている Record が Tuple\\
-  {a:Bool, Nat, c:Bool} も {a:Bool, 2:Nat, c:Bool} の略記と考えられる\\
+  \{a:Bool, Nat, c:Bool\} も \{a:Bool, 2:Nat, c:Bool\} の略記と考えられる\\
   しかし, ややこしいので止めましょう.
 }
 
@@ -249,40 +253,61 @@
 \frame{
   \frametitle{Record field の順序}
   しかしこの本では, 順序も考慮した同値性を選択.\\
-  Chap15 で subtyping を使って {a:1, b:2} と {a:2, b:1} を同一視する.
+  Chap15 で subtyping を使って \{a:1, b:2\} と \{a:2, b:1\} を同一視する.
   そのパフォーマンスについては \S 15.6 で議論する.
 }
 
 \frame{
   \frametitle{Record Pattern Match}
   拡張された Let Binding\\
-  ex. destructuring-bind (Common Lisp), multiple-value-bind (elisp), multiple assignment\\
-  「同じ変数は 2 度現れない」という仮定のもと, M-Rcd では代入演算を合成している.
+  ex. destructuring-bind (Common Lisp), multiple-value-bind?? (elisp), multiple assignment (Python)\\
+  「同じ変数は 2 度現れない」という仮定のもと, M-Rcd では代入演算を合成している.\\
+  let {a={c=x, d=y}, b=z}={a={c=1, d=2}, b=3} in add x y z\\
+  M-Rcd のルールは, Tuple で組まれている木の, 右優先, 深さ優先, 帰り掛けでの適用, を意味する.
 }
 
 \frame{
   \frametitle{Exercise 11.8.2}
-  
+  \begin{enumerate}
+  \item Pattern に型を付けろ
+  \item ここまでの文法の type preservation と progress の証明の概形を書け.
+  \end{enumerate}
 }
 
 \frame{
-  \frametitle{}
-
+  \frametitle{11.9 Sums}
+  型の和
+  (A+B で A 型または B 型を表す)\\
+  ex. Either (Haskell), 共通インターフェース (Java)\\
+  inl, inr でくるんで, $\type_1$, $\type_2$ 型を $\type_1+\type_2$ 型にする.
 }
 
 \frame{
-  \frametitle{}
-
+  \frametitle{Uniqueness of Types}
+  Type Sum を導入すると型の一意性が崩れてしまう.\\
+  1: Num のとき, inl 1: Num+Bool でもあり inl 1: Num+Num でもある.\\
+  解決策
+  \begin{itemize}
+    \item type checker の能力を上げる (Chap22)
+    \item 継承関係を入れて解決 (Chap15)
+    \item annotation を付けて明示 (←この章ではこれ)
+  \end{itemize}
 }
 
 \frame{
-  \frametitle{}
-
+  \frametitle{11.10 Variants}
+  Type Sum を任意個の型の和に拡張
+  使い勝手とかは Sum と同じ\\
+  ex. union? (C), Variant? (VB)
 }
 
 \frame{
-  \frametitle{}
-
+  \frametitle{Variants の応用}
+  \begin{itemize}
+    \item Options
+    \item Enumerations
+    \item SingleField Variable: 型の目印としての名前
+  \end{itemize}
 }
 
 
